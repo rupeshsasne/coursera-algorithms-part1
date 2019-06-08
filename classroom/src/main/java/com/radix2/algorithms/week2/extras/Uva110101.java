@@ -1,4 +1,4 @@
-package com.radix2.algorithms.extras;
+package com.radix2.algorithms.week2.extras;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
