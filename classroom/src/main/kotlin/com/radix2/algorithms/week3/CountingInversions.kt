@@ -20,18 +20,18 @@ fun sort(array: Array<Int>, aux: Array<Int>, lo: Int, hi: Int): Long {
 fun merge(array: Array<Int>, aux: Array<Int>, lo: Int, mid: Int, hi: Int): Long {
     var i = lo
     var j = mid + 1
-
+    val midToNext = j
     var k = lo
 
     var inversions = 0L
 
     while(i <= mid && j <= hi) {
-        if (array[i] > array[j]) {
-            aux[k++] = array[j++]
-            inversions += mid - i + 1
-        }
-        else
+        if (array[i] <= array[j]) {
             aux[k++] = array[i++]
+        } else {
+            aux[k++] = array[j++]
+            inversions += midToNext - i
+        }
     }
 
     while(i <= mid)
