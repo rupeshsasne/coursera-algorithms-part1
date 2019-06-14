@@ -2,6 +2,9 @@ package com.radix2.algorithms.week3
 
 import java.util.*
 
+// Counting inversions. An inversion in an array a[] is a pair of entries a[i] and a[j] such that i < j but a[i] > a[j].
+// Given an array, design a linear arithmetic algorithm to count the number of inversions.
+
 fun sort(array: IntArray, aux: IntArray, lo: Int, hi: Int): Long {
     if (lo >= hi) return 0
 
