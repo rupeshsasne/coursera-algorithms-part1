@@ -35,7 +35,7 @@ public final class KdTree {
 
     public void insert(final Point2D p) {
         requiresNonNull(p);
-        treeRoot = insert(treeRoot, p, 0, new RectHV(0, 0, 1, 1));
+        treeRoot = insert(treeRoot, null, p, 0);
     }
 
     public boolean contains(final Point2D p) {
@@ -64,7 +64,8 @@ public final class KdTree {
         return nearest(treeRoot, p, treeRoot.point);
     }
 
-    private Point2D nearest(final Node node, final Point2D queryPoint, final Point2D nearestPointFoundSoFar) {
+    private Point2D nearest(final Node node, final Point2D queryPoint,
+                            final Point2D nearestPointFoundSoFar) {
         Point2D winner = nearestPointFoundSoFar;
 
         if (node == null) {
@@ -93,10 +94,12 @@ public final class KdTree {
             return nearest(node.lb, queryPoint, winner);
         }
 
-        if (node.lb.rect.distanceSquaredTo(queryPoint) < node.rt.rect.distanceSquaredTo(queryPoint)) {
+        if (node.lb.rect.distanceSquaredTo(queryPoint) < node.rt.rect
+                .distanceSquaredTo(queryPoint)) {
             winner = nearest(node.lb, queryPoint, winner);
             winner = nearest(node.rt, queryPoint, winner);
-        } else {
+        }
+        else {
             winner = nearest(node.rt, queryPoint, winner);
             winner = nearest(node.lb, queryPoint, winner);
         }
@@ -138,8 +141,7 @@ public final class KdTree {
         }
     }
 
-    private Node insert(final Node root, final Point2D point, final int level,
-                        final RectHV rectHV) {
+    private Node insert(final Node root, final Node parent, final Point2D point, final int level) {
         if (root == null) {
 
             Node nodeToInsert = new Node(point);
@@ -147,33 +149,23 @@ public final class KdTree {
             nodeToInsert.lb = null;
             nodeToInsert.rt = null;
             nodeToInsert.level = level;
-            nodeToInsert.rect = rectHV;
+            nodeToInsert.rect = getRect(parent, point);
 
             return nodeToInsert;
         }
 
-        RectHV rect = rectHV;
-        int cmp;
-
-        if (root.level % 2 == 0) {
-            double rootX = root.point.x();
-            cmp = Double.compare(rootX, point.x());
-            rect = getLRRect(cmp, root, rootX, rect);
-        } else {
-            double rootY = root.point.y();
-            cmp = Double.compare(rootY, point.y());
-            rect = getTBRect(cmp, root, rootY, rect);
-        }
+        int cmp = root.level % 2 == 0 ? Double.compare(root.point.x(), point.x())
+                                      : Double.compare(root.point.y(), point.y());
 
         if (cmp >= 0) {
             if (cmp == 0 && root.point.equals(point)) {
                 return root;
             }
 
-            root.lb = insert(root.lb, point, level + 1, rect);
+            root.lb = insert(root.lb, root, point, level + 1);
         }
         else {
-            root.rt = insert(root.rt, point, level + 1, rect);
+            root.rt = insert(root.rt, root, point, level + 1);
         }
 
         root.size = 1 + (root.lb != null ? root.lb.size : 0) + (root.rt != null ? root.rt.size : 0);
@@ -181,7 +173,34 @@ public final class KdTree {
         return root;
     }
 
-    private RectHV getTBRect(final int cmp, final Node root, double rootY, final RectHV defaultRect) {
+    private RectHV getRect(final Node parent, final Point2D point) {
+        if (parent == null) {
+            return new RectHV(0, 0, 1, 1);
+        }
+
+        if (parent.level % 2 == 0) {
+            double parentX = parent.point.x();
+
+            return getLRRect(
+                    Double.compare(parentX, point.x()),
+                    parent,
+                    parentX,
+                    parent.rect
+            );
+        }
+
+        double parentY = parent.point.y();
+
+        return getTBRect(
+                Double.compare(parentY, point.y()),
+                parent,
+                parentY,
+                parent.rect
+        );
+    }
+
+    private RectHV getTBRect(final int cmp, final Node root, double rootY,
+                             final RectHV defaultRect) {
         if (cmp < 0) {
             return new RectHV(root.rect.xmin(), rootY, root.rect.xmax(), root.rect.ymax());
         }
@@ -192,7 +211,8 @@ public final class KdTree {
         return defaultRect;
     }
 
-    private RectHV getLRRect(final int cmp, final Node root, double rootX, final RectHV defaultRect) {
+    private RectHV getLRRect(final int cmp, final Node root, double rootX,
+                             final RectHV defaultRect) {
         if (cmp > 0) {
             return new RectHV(root.rect.xmin(), root.rect.ymin(), rootX, root.rect.ymax());
         }
