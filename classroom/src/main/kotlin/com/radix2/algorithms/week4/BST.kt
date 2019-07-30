@@ -35,7 +35,9 @@ class BST<K : Comparable<K>, V> : SymbolTable<K, V> {
         var left: Node<K, V>? = null,
         var right: Node<K, V>? = null,
         var count: Int = 1
-    )
+    ) {
+        override fun toString(): String = (key to data).toString()
+    }
 
     private var root: Node<K, V>? = null
 
@@ -69,7 +71,12 @@ class BST<K : Comparable<K>, V> : SymbolTable<K, V> {
         delete(root, key)
     }
 
-    override fun toString(): String = buildString { inOrderWithStack(root, this) } //buildString { inOrderRecursive(root, this) }
+    override fun toString(): String = buildString {
+        levelOrder(root, this)
+
+        //inOrderWithStack(root, this)
+        //inOrderRecursive(root, this)
+    }
 
     private fun put(root: Node<K, V>?, key: K, value: V): Node<K, V>? {
         if (root == null)
@@ -252,6 +259,36 @@ class BST<K : Comparable<K>, V> : SymbolTable<K, V> {
             trav = top.right
         }
     }
+
+    private fun levelOrder(root: Node<K, V>?, builder: StringBuilder) {
+        if (root == null)
+            return
+
+        val queue: Queue<Node<K, V>> = LinkedList()
+
+        queue.add(root)
+
+        with(queue) {
+            while (!queue.isEmpty()) {
+
+                if (builder.isNotEmpty()) {
+                    builder.append(", ")
+                }
+
+                builder.append(peek())
+
+                val front = queue.poll()
+
+                if (front.left != null) {
+                    add(front.left)
+                }
+
+                if (front.right != null) {
+                    add(front.right)
+                }
+            }
+        }
+    }
 }
 
 fun <K : Comparable<K>, V> SymbolTable<K, V?>.put(key: K) = this.put(key, null)
@@ -260,9 +297,11 @@ fun main() {
     val st: SymbolTable<Int, String?> = BST()
     st.put(6)
 
+    st.put(7)
+
     st.put(4)
 
     st.put(1)
 
-    println(st.floor(2))
+    println(st)
 }

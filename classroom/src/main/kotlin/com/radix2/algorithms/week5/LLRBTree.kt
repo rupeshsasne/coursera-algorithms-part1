@@ -3,6 +3,7 @@ package com.radix2.algorithms.week5
 import com.radix2.algorithms.week4.SymbolTable
 import com.radix2.algorithms.week4.put
 import java.lang.StringBuilder
+import java.util.*
 
 class LLRBTree<K : Comparable<K>, V> : SymbolTable<K, V> {
 
@@ -32,9 +33,7 @@ class LLRBTree<K : Comparable<K>, V> : SymbolTable<K, V> {
 
     override fun ceil(key: K): Pair<K, V>? = ceil(root, key)?.let { it.key to it.value }
 
-    override fun toString(): String = buildString {
-        levelOrder(root, height(root), this)
-    }
+    override fun toString(): String = levelOrder(root)
 
     private fun getNodesAtLevel(root: Node<K, V>?, level: Int, builder: StringBuilder) {
         if (root == null) return
@@ -52,6 +51,34 @@ class LLRBTree<K : Comparable<K>, V> : SymbolTable<K, V> {
             return 0
 
         return 1 + kotlin.math.max(height(root.left), height(root.right))
+    }
+
+    // M, E, R, C, L, P, X, A, H, S
+    // M, E, R, C, L, P, X, A, H, S
+    private fun levelOrder(root: Node<K, V>?): String {
+        if (root == null)
+            return ""
+
+        val queue: Queue<Node<K, V>> = LinkedList()
+
+        queue.add(root)
+
+        return buildString {
+            while (!queue.isEmpty()) {
+                if (length > 0)
+                    append(", ")
+
+                append(queue.peek().key)
+
+                val node = queue.poll()
+
+                if (node.left != null)
+                    queue.add(node.left)
+
+                if (node.right != null)
+                    queue.add(node.right)
+            }
+        }
     }
 
     private fun levelOrder(root: Node<K, V>?, height: Int, builder: StringBuilder) {

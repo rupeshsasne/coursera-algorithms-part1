@@ -12,6 +12,35 @@ class LinkedList<T : Comparable<T>> {
         head = n
     }
 
+    fun reverse() {
+        var trav = head
+        var prev: Node<T>? = null
+
+        while (trav != null) {
+            val temp = trav
+            trav = trav.next
+            temp.next = prev
+            prev = temp
+        }
+
+        head = prev
+    }
+
+    fun reverseRecurrsive() {
+
+        fun reverse(head: Node<T>?, prev: Node<T>?): Node<T>? {
+            if (head == null)
+                return prev
+
+            val temp = head.next
+
+            head.next = prev
+
+            return reverse(temp, head)
+        }
+
+        head = reverse(head, null)
+    }
 
     fun sort() {
         head = sort(head)
@@ -100,10 +129,11 @@ fun main(args: Array<String>) {
 
     val linkedList = LinkedList<Int>()
 
-    for (i in 0..1000) {
+    for (i in 0..10) {
         linkedList.add(i)
     }
 
-    linkedList.shuffle()
-    linkedList.sort()
+    linkedList.reverseRecurrsive()
+
+    println(linkedList)
 }
